@@ -1,7 +1,18 @@
 import { db } from "@/db/client"
 import { auditLog } from "@/db/schema"
 
-export type AuditKind = "sign_in" | "sign_in_failed"
+export type AuditKind =
+  | "sign_in"
+  | "sign_in_failed"
+  // Vault events carry kind/label only — never an identifier value.
+  | "identifier_added"
+  | "identifier_removed"
+  | "request_created"
+  | "request_sent"
+  | "reply_logged"
+  | "request_resolved"
+  | "registry_action"
+  | "cron_verify"
 
 /**
  * Write an audit row, swallowing failures.

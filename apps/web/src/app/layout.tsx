@@ -6,8 +6,9 @@ import "@werft/tokens/tokens.css"
 import "./globals.css"
 
 export const metadata: Metadata = {
-  title: "Werft app",
-  description: "Scaffolded from werft-template",
+  title: "Remove Me",
+  description:
+    "Personal exposure console: identity vault, DSGVO request orchestrator, opt-out registry",
 }
 
 export const viewport: Viewport = {
