@@ -53,6 +53,14 @@ is the template's audit table.
   (sent + 1 month, Art. 12(3)), `reply_text`/`reply_at`, `follow_up_of_id`
   (the Art. 15 an Art. 17 was spawned from), `recheck_due` (set by cron six
   months after a confirmed erasure), `escalation_draft`.
+- `gmail_connection` — the operator's Gmail OAuth refresh token
+  (AES-256-GCM encrypted like a vault value — it reads a whole mailbox),
+  plus the account address. At most one row. Migration
+  `0002_inbox_unsubscribe.sql`.
+- `bulk_sender` — a bulk sender found in the operator's own inbox: address,
+  display name, message count, encrypted unsubscribe targets (they often
+  embed the operator's email), RFC 8058 one-click flag, and status
+  (`new|unsubscribed|kept`). Same migration.
 - `registry_item` — unique `slug` (idempotent seeding key), name, deep link,
   covers jsonb, `renewal_months` (null = indefinite), status
   (`open|done|renewal_due`), `last_action_at`. Seeded by
@@ -76,6 +84,13 @@ All behind the operator gate except where noted.
 - `/requests/[id]` — the letter, workflow buttons (sent / log reply /
   satisfied / refused), the Art. 17 follow-up prompt, the escalation draft.
 - `/registry` — "Easy wins": the seeded checklist with deep links and "I did it".
+- `/inbox` — "Inbox unsubscribe": connect Gmail, scan (up to 100 recent
+  matching messages per run, `maxDuration = 60`), then per-sender one-click
+  unsubscribe, prefilled mailto, or their web link; plus an unsubscribe-all
+  button for one-click senders.
+- `GET /api/google/connect` / `GET /api/google/callback` — the OAuth dance.
+  Behind the session gate (the browser carries the operator's cookie through
+  Google's redirect), so only the operator can connect an account.
 - `GET /api/cron/verify` — exempt from the session gate in `proxy.ts`;
   authenticates via `Authorization: Bearer $CRON_SECRET` (Vercel Cron sends
   it automatically). Marks overdue requests (+ escalation draft), re-check
@@ -85,6 +100,11 @@ All behind the operator gate except where noted.
 
 - Neon Postgres via Drizzle — `DATABASE_URL`.
 - Vercel Cron — calls `/api/cron/verify` with `CRON_SECRET`.
+- Google OAuth + Gmail REST API — `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET`,
+  read lazily by `src/inbox/gmail.ts` only; scope `gmail.readonly`. Plain
+  `fetch`, no SDK — the blessed-dependency list stays untouched. Optional:
+  every other feature works with the vars unset, and `/inbox` explains the
+  setup when they are missing.
 - `IDENTITY_ENCRYPTION_KEY` — vault key; not a service, but losing it loses
   the vault. Read lazily by `src/vault/crypto.ts` only.
 - No model calls in any feature; `src/kompass.ts` sits unused from the
@@ -113,6 +133,12 @@ All behind the operator gate except where noted.
   Art. 15–22); the Art. 21 letter additionally states immediate effect with
   no balancing test, which is about the objection's substance, not the
   response deadline.
+- **Gmail scope is read-only, and unsubscribing is not correspondence.**
+  The app never sends, deletes or changes mail. A one-click unsubscribe is a
+  bare `POST List-Unsubscribe=One-Click` to the sender's own RFC 8058
+  endpoint (https-only, hostname-guarded in `src/inbox/parse.ts`), fired on
+  the operator's click; mailto unsubscribes open prefilled in the operator's
+  own mail app.
 - **The app drafts, the operator sends.** Applies to requests and to the
   Art. 77 complaint alike. Keeps the app out of e-mail deliverability,
   authenticity questions, and the blast radius of a bug that mails people.

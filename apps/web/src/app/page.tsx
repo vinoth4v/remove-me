@@ -4,7 +4,7 @@ import { signOutAction } from "@/app/actions"
 import { AppNav } from "@/app/nav"
 import { auth } from "@/auth"
 import { db } from "@/db/client"
-import { controller, exposure, identifier, registryItem, request } from "@/db/schema"
+import { bulkSender, controller, exposure, identifier, registryItem, request } from "@/db/schema"
 import { plainTypeNames } from "@/requests/labels"
 
 // Reads the session cookie and the database, so there is nothing to prerender.
@@ -13,7 +13,7 @@ export const dynamic = "force-dynamic"
 export default async function HomePage() {
   const session = await auth()
 
-  const [identifiers, exposures, requestRows, registryRows] = await Promise.all([
+  const [identifiers, exposures, requestRows, registryRows, senders] = await Promise.all([
     db().select({ id: identifier.id }).from(identifier),
     db().select({ id: exposure.id }).from(exposure),
     db()
@@ -21,6 +21,7 @@ export default async function HomePage() {
       .from(request)
       .innerJoin(controller, eq(request.controllerId, controller.id)),
     db().select().from(registryItem),
+    db().select({ id: bulkSender.id, status: bulkSender.status }).from(bulkSender),
   ])
 
   const steps = [
@@ -30,6 +31,13 @@ export default async function HomePage() {
       text: "Tell the app which name, email, phone and address it should get removed. Stored encrypted — only you can see them.",
       href: "/vault",
       action: "Add my details",
+    },
+    {
+      done: senders.some((s) => s.status !== "new"),
+      title: "Clean out your inbox",
+      text: "Connect your Gmail (read-only) and unsubscribe from newsletters and advertisers — one click each, or all at once.",
+      href: "/inbox",
+      action: "Start unsubscribing",
     },
     {
       done: registryRows.some((r) => r.status !== "open"),

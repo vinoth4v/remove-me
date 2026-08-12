@@ -147,3 +147,50 @@ Found and fixed radios rendering full-width (the `input { width: 100% }`
 reset needed a radio carve-out alongside checkboxes).
 
 **Open:** nothing new.
+
+---
+
+## Inbox bulk unsubscribe
+
+**Asked:** the bulk unsubscribe from the original pitch was missing — build
+it.
+
+**Changed:** new `/inbox` surface ("Unsubscribe" in the nav, step 2 on the
+home plan). The operator connects Gmail via their own Google OAuth client
+(`GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET`, lazy-read, optional — the page
+explains the one-time setup when unset). A scan reads up to 100 recent
+messages matching `unsubscribe newer_than:1y`, extracts
+`From`/`List-Unsubscribe`/`List-Unsubscribe-Post` headers, and groups them
+into a `bulk_sender` table. Per sender: one-click unsubscribe (server POSTs
+`List-Unsubscribe=One-Click` per RFC 8058), a prefilled mailto, or their web
+link — plus "unsubscribe from all one-click senders". Migration
+`0002_inbox_unsubscribe.sql`; pure header parsing in `src/inbox/parse.ts`
+(unit-tested, 9 tests); Gmail OAuth/REST via plain fetch in
+`src/inbox/gmail.ts`.
+
+**Decided:**
+- Scope is `gmail.readonly`, full stop. Mailto unsubscribes open in the
+  operator's mail app rather than granting the app send rights — keeps the
+  "app never sends mail" line absolute and the consent screen minimal.
+- The refresh token and the unsubscribe targets are encrypted with the vault
+  crypto: the token reads a whole mailbox, and unsubscribe URLs routinely
+  embed the operator's email address.
+- One-click POSTs are guarded (https only, no raw-IP/localhost hosts) —
+  the URLs come from the operator's own inbox, but the server still refuses
+  to be pointed at itself.
+- Plain fetch against Google's REST endpoints instead of `googleapis` — the
+  blessed-dependency list stays untouched, no human decision needed.
+- Scan caps at 100 messages per run inside the 60s function budget;
+  repeated scans accumulate (upsert on sender address, `GREATEST` on
+  counts, status preserved so re-appearing senders keep their history).
+
+**Rejected:**
+- `gmail.modify`/auto-archiving: out of scope and against the read-only
+  line.
+- Gmail batch endpoint for the scan (hand-rolled multipart parsing for a
+  v1 that works fine sequentially at 100 messages).
+
+**Open:** operator must create the Google OAuth client and set the two env
+vars before the feature lights up (in-page instructions cover it). Preview
+deployments cannot connect Gmail — their URLs are not registered redirect
+URIs; expected, not a bug.
