@@ -72,3 +72,35 @@ exemption; audit kinds extended (vault events log kind/label, never values).
 **Open:** breach API integration (needs key + blessing); e2e coverage for
 the new surfaces; whether `responded`-but-stalled requests deserve a cron
 flag of their own.
+
+---
+
+## Browser walkthrough of the deployed feature set
+
+**Asked:** log in and try the app; then record the one gotcha found.
+
+**Changed:** no app code. `.env.example` gained a warning that
+`WERFT_PASSWORD_HASH` must have every `$` escaped as `\$` in `.env.local`;
+this entry.
+
+**What was done:** ran the app locally against a disposable Neon branch
+(`local-try-app`, branched from production, deleted afterwards — production
+data untouched) with a throwaway operator password, and drove every surface
+in a real browser. Verified: the login gate and its audit trail; all four
+identifier kinds stored as `v1.<iv>.<tag>.<ciphertext>` with no plaintext in
+the database; the permanence classifier showing "Draft request" for a
+removable exposure and the Art. 17(3) refusal text for a permanent one; the
+prefilled Art. 15 → sent (deadline exactly +1 month) → reply logged →
+prefilled Art. 17 follow-up chain; all six registry rows with working links
+and "Done today"; the cron rejecting unauthenticated calls, flagging a
+backdated request overdue and a backdated registry row renewal-due, and
+writing the LfDI Baden-Württemberg complaint draft.
+
+**Found the hard way:** Next's `@next/env` runs dotenv-expansion on
+`.env.local` values *even inside single quotes*, so an unescaped scrypt hash
+(`scrypt$65536$…`) is silently truncated to the literal string `scrypt` and
+every sign-in fails with no other symptom. The fix is escaping each `$` as
+`\$`. Vercel dashboard env vars are stored, not parsed, so production was
+never affected — which is why the bug only ever bites local dev.
+
+**Open:** nothing new.
