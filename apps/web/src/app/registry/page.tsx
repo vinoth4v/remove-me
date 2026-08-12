@@ -8,15 +8,15 @@ import { markRegistryDoneAction, reopenRegistryAction } from "./actions.ts"
 export const dynamic = "force-dynamic"
 
 const statusBadge: Record<RegistryStatus, { label: string; className: string }> = {
-  open: { label: "open", className: "badge" },
+  open: { label: "still to do", className: "badge" },
   done: { label: "done", className: "badge badge-good" },
-  renewal_due: { label: "renewal due", className: "badge badge-stop" },
+  renewal_due: { label: "do it again", className: "badge badge-stop" },
 }
 
 function renewalLabel(months: number | null): string {
-  if (months === null) return "indefinite"
-  if (months % 12 === 0) return `every ${months / 12} year${months === 12 ? "" : "s"}`
-  return `every ${months} months`
+  if (months === null) return "lasts forever"
+  if (months % 12 === 0) return `redo every ${months / 12 === 1 ? "year" : `${months / 12} years`}`
+  return `redo every ${months} months`
 }
 
 export default async function RegistryPage() {
@@ -26,21 +26,20 @@ export default async function RegistryPage() {
   return (
     <main>
       <AppNav current="/registry" />
-      <h1>Opt-out registry</h1>
+      <h1>Easy wins</h1>
       <p className="muted">
-        Known German opt-out actions — a tracked checklist, deliberately not automated. Open the
-        link, do the action yourself, then record it here. The weekly check flags entries past their
-        renewal interval.
+        Six free opt-outs that stop most advertising post, spam and directory listings in Germany —
+        no letters needed. For each one: open the link, follow the steps on their site, then come
+        back and press “I did it”. The app reminds you when one expires.
       </p>
 
       <table>
         <thead>
           <tr>
-            <th>Action</th>
-            <th>Covers</th>
-            <th>Renewal</th>
+            <th>What</th>
+            <th>Protects</th>
+            <th>How long it lasts</th>
             <th>Status</th>
-            <th>Last action</th>
             <th />
           </tr>
         </thead>
@@ -51,7 +50,7 @@ export default async function RegistryPage() {
               <tr key={row.id}>
                 <td>
                   <a href={row.deepLink} target="_blank" rel="noreferrer">
-                    {row.name}
+                    {row.name} ↗
                   </a>
                   {row.notes ? (
                     <>
@@ -64,17 +63,24 @@ export default async function RegistryPage() {
                 <td>{renewalLabel(row.renewalMonths)}</td>
                 <td>
                   <span className={badge.className}>{badge.label}</span>
+                  {row.lastActionAt ? (
+                    <>
+                      <br />
+                      <span className="muted">
+                        last done {row.lastActionAt.toISOString().slice(0, 10)}
+                      </span>
+                    </>
+                  ) : null}
                 </td>
-                <td>{row.lastActionAt ? row.lastActionAt.toISOString().slice(0, 10) : "—"}</td>
                 <td>
                   <form action={markRegistryDoneAction} className="inline">
                     <input type="hidden" name="id" value={row.id} />
-                    <button type="submit">Done today</button>
+                    <button type="submit">I did it</button>
                   </form>{" "}
                   {row.status !== "open" ? (
                     <form action={reopenRegistryAction} className="inline">
                       <input type="hidden" name="id" value={row.id} />
-                      <button type="submit">Reopen</button>
+                      <button type="submit">Undo</button>
                     </form>
                   ) : null}
                 </td>

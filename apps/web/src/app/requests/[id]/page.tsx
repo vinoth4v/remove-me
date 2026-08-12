@@ -2,9 +2,10 @@ import { eq } from "drizzle-orm"
 import Link from "next/link"
 import { notFound } from "next/navigation"
 import { AppNav } from "@/app/nav"
+import { CopyButton } from "@/components/copy-button"
 import { db } from "@/db/client"
 import { controller, request } from "@/db/schema"
-import { typeNames } from "@/requests/labels"
+import { plainTypeNames, statusLabels, typeNames } from "@/requests/labels"
 import {
   createFollowUpAction,
   generateEscalationAction,
@@ -20,13 +21,17 @@ const day = (d: Date | null) => (d ? d.toISOString().slice(0, 10) : "—")
 export default async function RequestDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const [row] = await db()
-    .select({ req: request, controllerName: controller.name })
+    .select({
+      req: request,
+      controllerContact: controller.contact,
+      controllerName: controller.name,
+    })
     .from(request)
     .innerJoin(controller, eq(request.controllerId, controller.id))
     .where(eq(request.id, id))
   if (!row) notFound()
 
-  const { req, controllerName } = row
+  const { req, controllerName, controllerContact } = row
 
   const [followUp] = await db()
     .select({ id: request.id })
@@ -34,76 +39,106 @@ export default async function RequestDetailPage({ params }: { params: Promise<{ 
     .where(eq(request.followUpOfId, req.id))
 
   const promptFollowUp = req.type === "art15" && req.replyAt !== null && !followUp
+  const emailContact = controllerContact?.includes("@") ? controllerContact : null
+  const [subjectLine] = req.body.split("\n")
+  const mailtoHref = emailContact
+    ? `mailto:${emailContact}?subject=${encodeURIComponent(subjectLine ?? "")}&body=${encodeURIComponent(req.body)}`
+    : null
 
   return (
     <main>
       <AppNav current="/requests" />
       <h1>
-        {typeNames[req.type]} — {controllerName}
+        {plainTypeNames[req.type]} — {controllerName}
       </h1>
       <p className="muted">
-        Status: <strong>{req.status}</strong> · created {day(req.createdAt)} · sent{" "}
-        {day(req.sentAt)} · deadline {day(req.deadlineAt)}
+        {typeNames[req.type]} · Status: <strong>{statusLabels[req.status]}</strong> · written{" "}
+        {day(req.createdAt)}
+        {req.sentAt ? ` · sent ${day(req.sentAt)}` : ""}
+        {req.deadlineAt ? ` · answer due by ${day(req.deadlineAt)}` : ""}
         {req.followUpOfId ? (
           <>
             {" "}
-            · follow-up of <Link href={`/requests/${req.followUpOfId}`}>an Art. 15 request</Link>
+            · follows up on <Link href={`/requests/${req.followUpOfId}`}>an earlier request</Link>
           </>
         ) : null}
       </p>
 
+      {req.status === "draft" ? (
+        <div className="hint">
+          <strong>What to do now</strong>
+          <ol className="steps-plain">
+            <li>Copy the letter below.</li>
+            <li>
+              {emailContact
+                ? `Email it to ${emailContact} (the button does both at once), or print and post it.`
+                : "Email it to the company's privacy address (often datenschutz@… or privacy@…, listed in their Impressum or privacy policy), or print and post it."}
+            </li>
+            <li>Come back and press “I sent it” so the app can watch the deadline.</li>
+          </ol>
+          <CopyButton text={req.body} label="Copy the letter" />{" "}
+          {mailtoHref ? (
+            <a className="button-secondary" href={mailtoHref}>
+              Open in my email app
+            </a>
+          ) : null}{" "}
+          <form action={markSentAction} className="inline">
+            <input type="hidden" name="id" value={req.id} />
+            <button type="submit">I sent it</button>
+          </form>
+        </div>
+      ) : null}
+
+      {req.status === "sent" ? (
+        <p className="hint">
+          ⏳ Waiting for their answer — they must reply by <strong>{day(req.deadlineAt)}</strong>.
+          When anything arrives, paste it below. If the date passes, the app flags it and prepares a
+          free complaint letter for you.
+        </p>
+      ) : null}
+
       {promptFollowUp ? (
-        <fieldset>
-          <legend>Follow up</legend>
-          <p>
-            The controller has answered this Auskunft. If the disclosed data should go, open an
-            erasure request against <strong>{controllerName}</strong> — prefilled with the same
-            identifiers.
-          </p>
+        <div className="hint">
+          <strong>They told you what they have.</strong> If you want that data gone, the app can
+          write the deletion demand against {controllerName} right away — already filled in with the
+          same details.
+          <br />
           <form action={createFollowUpAction} className="inline">
             <input type="hidden" name="id" value={req.id} />
-            <button type="submit">Open prefilled Art. 17 follow-up</button>
+            <button type="submit">Write the deletion letter</button>
           </form>
-        </fieldset>
+        </div>
       ) : null}
 
       {followUp ? (
         <p>
-          An Art. 17 follow-up exists: <Link href={`/requests/${followUp.id}`}>open it</Link>.
+          A deletion letter exists for this: <Link href={`/requests/${followUp.id}`}>open it</Link>.
         </p>
       ) : null}
 
       {req.recheckDue ? (
         <p role="alert">
-          Erasure was confirmed more than six months ago. Re-check this controller — re-listing
-          after deletion is the norm, not the exception. Log a new exposure or open a fresh Art. 15
-          if the data is back.
+          They confirmed deletion more than six months ago. Data often quietly comes back — worth
+          searching for yourself again. If it is back, write them a fresh letter.
         </p>
       ) : null}
 
-      <h2>Letter</h2>
+      <h2>The letter</h2>
       <pre className="letter">{req.body}</pre>
-
-      {req.status === "draft" ? (
-        <form action={markSentAction} className="inline">
-          <input type="hidden" name="id" value={req.id} />
-          <button type="submit">Mark as sent — starts the 1-month deadline</button>
-        </form>
-      ) : null}
 
       {req.status === "sent" || req.status === "overdue" || req.status === "responded" ? (
         <form action={logReplyAction}>
           <fieldset>
             <legend>
-              {req.replyText ? "Update the controller's reply" : "Log the controller's reply"}
+              {req.replyText ? "Update their answer" : "They answered? Paste it here"}
             </legend>
             <p>
-              <label htmlFor="reply-date">Reply date</label>
+              <label htmlFor="reply-date">When did the answer arrive?</label>
               <br />
               <input id="reply-date" name="replyDate" type="date" required />
             </p>
             <p>
-              <label htmlFor="reply-text">Reply text</label>
+              <label htmlFor="reply-text">What did they say? (paste their reply)</label>
               <br />
               <textarea
                 id="reply-text"
@@ -114,47 +149,52 @@ export default async function RequestDetailPage({ params }: { params: Promise<{ 
               />
             </p>
             <input type="hidden" name="id" value={req.id} />
-            <button type="submit">Log reply</button>
+            <button type="submit">Save their answer</button>
           </fieldset>
         </form>
       ) : null}
 
       {req.replyText && req.status !== "responded" ? (
         <>
-          <h2>Controller's reply ({day(req.replyAt)})</h2>
+          <h2>Their answer ({day(req.replyAt)})</h2>
           <pre className="letter">{req.replyText}</pre>
         </>
       ) : null}
 
       {req.status === "responded" ? (
-        <div>
+        <div className="hint">
+          <strong>Did they actually do what you asked?</strong>
+          <br />
           <form action={resolveRequestAction} className="inline">
             <input type="hidden" name="id" value={req.id} />
             <input type="hidden" name="outcome" value="satisfied" />
-            <button type="submit">Satisfied</button>
+            <button type="submit">Yes, done</button>
           </form>{" "}
           <form action={resolveRequestAction} className="inline">
             <input type="hidden" name="id" value={req.id} />
             <input type="hidden" name="outcome" value="refused" />
-            <button type="submit">Refused</button>
+            <button type="submit">No, they refused</button>
           </form>
         </div>
       ) : null}
 
       {req.status === "overdue" ? (
         <>
-          <h2>Escalation — complaint to LfDI Baden-Württemberg</h2>
+          <h2>They missed the legal deadline</h2>
+          <p className="muted">
+            You can now complain to the privacy authority (LfDI Baden-Württemberg) — it is free and
+            often gets things moving. The letter below is ready: copy it and send it yourself, the
+            app never sends anything.
+          </p>
           {req.escalationDraft ? (
             <>
-              <p className="muted">
-                Draft only. This app never sends anything — copy it and file the complaint yourself.
-              </p>
+              <CopyButton text={req.escalationDraft} label="Copy the complaint" />
               <pre className="letter">{req.escalationDraft}</pre>
             </>
           ) : (
             <form action={generateEscalationAction} className="inline">
               <input type="hidden" name="id" value={req.id} />
-              <button type="submit">Generate complaint draft</button>
+              <button type="submit">Prepare the complaint letter</button>
             </form>
           )}
         </>

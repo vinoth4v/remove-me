@@ -83,8 +83,9 @@ textarea:hover {
   border-color: var(--color-muted);
 }
 
-/* Checkboxes are inline controls, not full-width fields. */
-input[type="checkbox"] {
+/* Checkboxes and radios are inline controls, not full-width fields. */
+input[type="checkbox"],
+input[type="radio"] {
   width: auto;
 }
 
@@ -210,12 +211,57 @@ pre.letter {
   font-size: var(--font-size-sm);
 }
 
-/* A checkbox row: full-width label in body colour, box inline before text. */
+/* A checkbox/radio row: full-width label in body colour, box inline before text. */
 label.choice {
   display: block;
-  margin-bottom: var(--space-1);
+  margin-bottom: var(--space-2);
   color: var(--color-fg);
   font-weight: var(--font-weight-normal);
+}
+
+.choice-hint {
+  display: inline-block;
+  padding-left: var(--space-6);
+}
+
+/* Friendly guidance box — the "what to do now" companion on every screen. */
+.hint {
+  margin: var(--space-4) 0;
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-left: 3px solid var(--color-accent);
+  border-radius: var(--radius-md);
+}
+
+/* The numbered plan on the home page. */
+ol.steps {
+  margin: 0 0 var(--space-8);
+  padding-left: var(--space-6);
+}
+
+ol.steps > li {
+  margin-bottom: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+ol.steps > li.step-done {
+  opacity: 0.7;
+}
+
+/* Compact numbered instructions inside a hint box. */
+ol.steps-plain {
+  margin: var(--space-2) 0;
+  padding-left: var(--space-6);
+}
+
+a.button-secondary {
+  display: inline-block;
+  border-radius: var(--radius-md);
+  text-decoration: none;
 }
 
 fieldset {
@@ -230,27 +276,4 @@ legend {
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
   color: var(--color-muted);
-}
-
-.stat-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
-  gap: var(--space-4);
-  margin-bottom: var(--space-8);
-}
-
-.stat-grid a {
-  display: block;
-  padding: var(--space-4);
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  text-decoration: none;
-  color: var(--color-fg);
-}
-
-.stat-grid strong {
-  display: block;
-  font-size: var(--font-size-2xl);
-  font-weight: var(--font-weight-semibold);
 }

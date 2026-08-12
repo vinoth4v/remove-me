@@ -1,11 +1,11 @@
 import Link from "next/link"
 
 const links = [
-  { href: "/", label: "Overview" },
-  { href: "/vault", label: "Vault" },
-  { href: "/exposures", label: "Exposures" },
-  { href: "/requests", label: "Requests" },
-  { href: "/registry", label: "Registry" },
+  { href: "/", label: "Home" },
+  { href: "/vault", label: "My details" },
+  { href: "/exposures", label: "Who has my data" },
+  { href: "/requests", label: "My requests" },
+  { href: "/registry", label: "Easy wins" },
 ] as const
 
 export function AppNav({ current }: { current: string }) {
