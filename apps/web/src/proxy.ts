@@ -15,7 +15,11 @@ export default NextAuth(authConfig).auth
  * broken icon. Any future route that must be reachable without a session
  * (an API other services call, say) needs its own entry here too, or every
  * caller silently gets a redirect instead of the route.
+ *
+ * api/cron is exempted the same way: Vercel Cron calls it with no session
+ * cookie at all, so it would otherwise always redirect to /login. It is not
+ * left open — src/app/api/cron/scan/route.ts checks CRON_SECRET itself.
  */
 export const config = {
-  matcher: ["/((?!api/auth|login|_next/static|_next/image|favicon.ico|icon.svg).*)"],
+  matcher: ["/((?!api/auth|api/cron|login|_next/static|_next/image|favicon.ico|icon.svg).*)"],
 }

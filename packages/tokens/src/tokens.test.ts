@@ -61,6 +61,14 @@ describe("themes", () => {
     expect(renderCss("deck")).toContain("#4ade80")
     expect(renderCss("kimi-earth")).toContain("#b85c3e")
     expect(renderCss("kimi-terminal")).toContain("#f59e0b")
+    expect(renderCss("editorial")).toContain("#8c2f1f")
     expect(renderCss("werft")).not.toContain("#b0421f")
+  })
+
+  it("every theme carries a serif font, falling back to the default when a theme predates it", () => {
+    // madras defines fontFamily but never named serif — it must still fall
+    // back to the shared default rather than lose the property.
+    expect(renderCss("madras")).toContain("--font-family-serif:")
+    expect(renderCss("editorial")).toContain("Iowan Old Style")
   })
 })

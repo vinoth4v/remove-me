@@ -15,16 +15,30 @@ body {
   background: var(--color-bg);
 }
 
-main {
-  max-width: 40rem;
-  margin: 0 auto;
-  padding: var(--space-12) var(--space-6);
+h1,
+h2,
+h3 {
+  margin: 0 0 var(--space-6);
+  font-family: var(--font-family-serif);
+  font-weight: var(--font-weight-semibold);
 }
 
 h1 {
-  margin: 0 0 var(--space-6);
   font-size: var(--font-size-2xl);
-  font-weight: var(--font-weight-semibold);
+}
+
+h2 {
+  font-size: var(--font-size-xl);
+}
+
+h3 {
+  font-size: var(--font-size-lg);
+}
+
+hr {
+  border: none;
+  border-top: 1px solid var(--color-border);
+  margin: var(--space-6) 0;
 }
 
 label {
@@ -35,7 +49,8 @@ label {
   color: var(--color-muted);
 }
 
-input {
+input,
+select {
   width: 100%;
   padding: var(--space-2) var(--space-3);
   font: inherit;
@@ -46,12 +61,15 @@ input {
 }
 
 input:focus-visible,
-button:focus-visible {
+select:focus-visible,
+button:focus-visible,
+a:focus-visible {
   outline: 2px solid var(--color-accent);
   outline-offset: 2px;
 }
 
-input:hover {
+input:hover,
+select:hover {
   border-color: var(--color-muted);
 }
 
@@ -59,8 +77,10 @@ button {
   padding: var(--space-2) var(--space-4);
   font: inherit;
   font-weight: var(--font-weight-medium);
+  /* Ink, not the accent — remove-me reserves its one accent colour for
+     exposure/risk signals, and an ordinary action button is not one. */
   color: var(--color-bg);
-  background: var(--color-accent);
+  background: var(--color-fg);
   border: none;
   border-radius: var(--radius-md);
   cursor: pointer;
@@ -69,14 +89,49 @@ button {
     transform 120ms ease;
 }
 
-/* brightness, not a second colour: hover stays derived from the one accent
-   token instead of quietly becoming a token nobody can find. */
 button:hover {
-  filter: brightness(1.08);
+  opacity: 0.85;
 }
 
 button:active {
   transform: translateY(1px);
+}
+
+button:disabled {
+  cursor: not-allowed;
+  filter: grayscale(0.4);
+  opacity: 0.6;
+}
+
+/* A button that reads as a hairline-bordered link, not a call to action —
+   Block, Sign out, secondary actions. Ink, never the risk-only accent. */
+.button-quiet {
+  color: var(--color-fg);
+  background: transparent;
+  border: 1px solid var(--color-border);
+}
+
+.button-quiet:hover {
+  filter: none;
+  border-color: var(--color-fg);
+}
+
+/* A link that reads as a button — "Connect Gmail", "Open unsubscribe link" —
+   for navigation that isn't a form submission, where a <button> would mean
+   nesting interactive elements. Ink, same as button, not the risk-only
+   accent. */
+.button-link {
+  display: inline-block;
+  padding: var(--space-2) var(--space-4);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-bg);
+  background: var(--color-fg);
+  border-radius: var(--radius-md);
+  text-decoration: none;
+}
+
+.button-link:hover {
+  opacity: 0.85;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -94,4 +149,226 @@ button:active {
   background: var(--color-surface);
   border: 1px solid var(--color-danger);
   border-radius: var(--radius-md);
+}
+
+/* ---- Auth (login) — the one narrow, centred screen ---- */
+
+.auth-shell {
+  max-width: 24rem;
+  margin: var(--space-12) auto;
+  padding: 0 var(--space-6);
+}
+
+/* ---- App shell — the four data-console screens ---- */
+
+.app-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-topbar {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-8);
+  padding: var(--space-4) var(--space-6);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.app-wordmark {
+  font-family: var(--font-family-serif);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  white-space: nowrap;
+}
+
+.app-nav {
+  display: flex;
+  gap: var(--space-6);
+  flex: 1;
+}
+
+.app-nav a {
+  color: var(--color-muted);
+  text-decoration: none;
+  font-size: var(--font-size-sm);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.app-nav a:hover,
+.app-nav a[aria-current="page"] {
+  color: var(--color-fg);
+}
+
+.app-main {
+  flex: 1;
+  width: 100%;
+  max-width: 76rem;
+  margin: 0 auto;
+  padding: var(--space-8) var(--space-6) var(--space-12);
+}
+
+form.inline {
+  display: inline;
+}
+
+/* ---- Numerals: monospace, tabular, wherever a count appears ---- */
+
+.num {
+  font-family: var(--font-family-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- Stat row — the Exposure screen's headline counts ---- */
+
+.stat-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-8);
+  padding-bottom: var(--space-8);
+  margin-bottom: var(--space-8);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.stat {
+  min-width: 8rem;
+}
+
+.stat-label {
+  display: block;
+  font-size: var(--font-size-sm);
+  color: var(--color-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: var(--space-1);
+}
+
+.stat-value {
+  font-family: var(--font-family-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--font-size-2xl);
+}
+
+.stat-value.risk {
+  color: var(--color-accent);
+}
+
+/* ---- Exposure score — a horizontal bar with a numeric label ---- */
+
+.score-track {
+  width: 100%;
+  height: 1.5rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+}
+
+.score-fill {
+  height: 100%;
+  background: var(--color-accent);
+}
+
+.score-label {
+  display: flex;
+  justify-content: space-between;
+  margin-top: var(--space-2);
+  font-family: var(--font-family-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-muted);
+}
+
+/* ---- Dense tables — left-aligned, hairline rows, no striping ---- */
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.data-table th {
+  padding: var(--space-2) var(--space-4) var(--space-2) 0;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid var(--color-border);
+  white-space: nowrap;
+}
+
+.data-table td {
+  padding: var(--space-4) var(--space-4) var(--space-4) 0;
+  border-bottom: 1px solid var(--color-border);
+  vertical-align: top;
+}
+
+.data-table tr:last-child td {
+  border-bottom: none;
+}
+
+/* ---- Badges — bordered text, never filled. Accent only for risk. ---- */
+
+.badge {
+  display: inline-block;
+  padding: 0.1em 0.5em;
+  font-size: var(--font-size-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border: 1px solid currentColor;
+  white-space: nowrap;
+}
+
+.badge-neutral {
+  color: var(--color-fg);
+}
+
+.badge-muted {
+  color: var(--color-muted);
+}
+
+.badge-risk {
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+/* ---- Empty / explanatory states ---- */
+
+.empty-state {
+  padding: var(--space-8) 0;
+  color: var(--color-muted);
+  max-width: 36rem;
+}
+
+.empty-state p {
+  margin: 0 0 var(--space-3);
+}
+
+/* ---- Small print — inline reasons, the unsubscribe audit log ---- */
+
+.fine-print {
+  font-size: var(--font-size-sm);
+  color: var(--color-muted);
+}
+
+.audit-log {
+  margin-top: var(--space-3);
+  padding-left: 0;
+  list-style: none;
+  font-size: var(--font-size-sm);
+  color: var(--color-muted);
+}
+
+.audit-log li {
+  padding: var(--space-1) 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+/* ---- The generated GDPR email text — copy-ready, so it reads as text ---- */
+
+.request-text {
+  width: 100%;
+  min-width: 18rem;
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-sm);
+  resize: vertical;
 }

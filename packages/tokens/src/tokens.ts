@@ -76,6 +76,9 @@ export const fontWeight = {
 export const fontFamily = {
   sans: "ui-sans-serif, system-ui, sans-serif",
   mono: "ui-monospace, SFMono-Regular, Menlo, monospace",
+  // Optional per theme — falls back to serif system faces, so a theme that
+  // never mentions it still gets a real serif rather than an unresolved var().
+  serif: "ui-serif, Georgia, 'Times New Roman', serif",
 } as const
 
 export type ColorToken = keyof typeof color

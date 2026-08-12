@@ -22,7 +22,15 @@ export function resolveTheme(name: ThemeName) {
     radius: theme.radius ?? radius,
     fontSize,
     fontWeight,
-    fontFamily: theme.fontFamily ?? fontFamily,
+    // Merged per key, not swapped wholesale: a theme naming sans/mono but not
+    // serif (every theme predating serif) must still fall back to the
+    // default serif rather than lose the property entirely — that is what
+    // keeps every theme emitting the same custom property names.
+    fontFamily: {
+      sans: theme.fontFamily?.sans ?? fontFamily.sans,
+      mono: theme.fontFamily?.mono ?? fontFamily.mono,
+      serif: theme.fontFamily?.serif ?? fontFamily.serif,
+    },
   }
 }
 

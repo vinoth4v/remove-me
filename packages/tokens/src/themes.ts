@@ -29,7 +29,9 @@ import { color } from "./tokens.ts"
  * theme to the default's exact hex strings. */
 type Scheme = { light: string; dark: string }
 type ColorSet = Record<keyof typeof color, Scheme>
-type FontSet = { sans: string; mono: string }
+// serif is optional per theme — resolveTheme falls back to the default
+// token's serif for any theme that does not name its own.
+type FontSet = { sans: string; mono: string; serif?: string }
 type RadiusSet = { sm: string; md: string; lg: string; full: string }
 
 export type Theme = {
@@ -182,6 +184,29 @@ export const THEMES = {
       mono: "ui-monospace, SFMono-Regular, Menlo, monospace",
     },
     radius: { sm: "0.125rem", md: "0.25rem", lg: "0.375rem", full: "9999px" },
+  },
+  editorial: {
+    label: "Editorial",
+    inspiration: "Remove Me's print-editorial data console — warm paper, oxblood risk accent.",
+    color: {
+      bg: { light: "#faf8f4", dark: "#17140f" },
+      surface: { light: "#faf8f4", dark: "#17140f" },
+      fg: { light: "#1a1a18", dark: "#ede8de" },
+      muted: { light: "#6b6558", dark: "#9c9384" },
+      border: { light: "#d9d2c4", dark: "#3a3527" },
+      // Oxblood — reserved in this app for exposure/risk signals only, never
+      // decorative. See remove-me's docs/ARCHITECTURE.md.
+      accent: { light: "#8c2f1f", dark: "#c14a34" },
+      danger: { light: "#8c2f1f", dark: "#c14a34" },
+      success: { light: "#4b5d43", dark: "#8ba57e" },
+    },
+    fontFamily: {
+      serif: "'Iowan Old Style', Georgia, 'Times New Roman', serif",
+      sans: "-apple-system, 'Helvetica Neue', Arial, sans-serif",
+      mono: "'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace",
+    },
+    // No rounded cards — separation comes from hairline rules, not shape.
+    radius: { sm: "0", md: "0", lg: "0", full: "9999px" },
   },
 } as const satisfies Record<string, Theme>
 
