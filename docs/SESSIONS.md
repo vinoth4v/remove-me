@@ -104,3 +104,46 @@ every sign-in fails with no other symptom. The fix is escaping each `$` as
 never affected — which is why the bug only ever bites local dev.
 
 **Open:** nothing new.
+
+---
+
+## Plain-language UX overhaul
+
+**Asked:** the UI was too complicated for a non-technical person — make it
+easy enough that a beginner benefits.
+
+**Changed:** every screen rewritten in plain language; no schema or workflow
+changes. Navigation is now Home / My details / Who has my data / My requests
+/ Easy wins. Home is a numbered four-step plan with completion ticks and a
+"Needs your attention" list of plain sentences. Request types are radio
+choices ("Ask what they know about me", "Delete my data", "Stop sending me
+advertising", "Correct wrong data") with one-line explanations; the legal
+names stay as small print. Statuses read as "waiting for their answer",
+"answer overdue", "done". The request detail page tells the user exactly
+what to do next per status, with a Copy-the-letter button (first client
+component, `src/components/copy-button.tsx`) and an "Open in my email app"
+mailto link when the company's address is known. Adding an exposure and its
+company is now one form — `addExposureAction` finds-or-creates the
+controller case-insensitively, and a skipped "why" gets a stored default
+reason per removability rating. All wording lives in
+`src/requests/labels.ts`.
+
+**Decided:**
+- Plain words lead, legal terms follow in parentheses — the letters still
+  cite the articles, so the user learns the mapping without needing it.
+- The separate "add controller" step was removed rather than simplified: a
+  beginner should never meet the word "controller".
+- Radio groups with per-option hints replace selects for request type and
+  removability — a select hides exactly the explanations a beginner needs.
+
+**Rejected:** a multi-page wizard with client-side state — more code and
+more ways to get lost than one guided page per topic; revisit only if the
+single-page forms grow.
+
+**Verified:** in a real browser against a disposable Neon branch
+(`local-ux-check`, deleted after): guided home, one-form company+exposure
+add, plain-language letter form, and the draft page's copy/email/sent flow.
+Found and fixed radios rendering full-width (the `input { width: 100% }`
+reset needed a radio carve-out alongside checkboxes).
+
+**Open:** nothing new.

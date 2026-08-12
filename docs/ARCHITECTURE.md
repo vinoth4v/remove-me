@@ -64,16 +64,18 @@ is the template's audit table.
 
 All behind the operator gate except where noted.
 
-- `/` — dashboard: counts, overdue and re-check alerts.
-- `/vault` — identifier CRUD (decrypts for display server-side).
-- `/exposures` — controller + exposure CRUD; "Draft request" links, replaced
-  for permanent exposures by the reason no request will be drafted.
+- `/` — guided home ("Your plan"): a four-step checklist with completion
+  state, plus a plain-language "Needs your attention" list.
+- `/vault` — "My details": identifier CRUD (decrypts for display server-side).
+- `/exposures` — "Who has my data": one form creates controller + exposure
+  together (find-or-create by name — a beginner never meets "controller");
+  permanent rows show why no request will be drafted.
 - `/requests` — list + new-request form (type, language, identifier
   checkboxes; `?exposure=` prefills). Permanent exposures are excluded from
   the form, and `createRequestAction` refuses them server-side regardless.
 - `/requests/[id]` — the letter, workflow buttons (sent / log reply /
   satisfied / refused), the Art. 17 follow-up prompt, the escalation draft.
-- `/registry` — the seeded checklist with deep links and "Done today".
+- `/registry` — "Easy wins": the seeded checklist with deep links and "I did it".
 - `GET /api/cron/verify` — exempt from the session gate in `proxy.ts`;
   authenticates via `Authorization: Bearer $CRON_SECRET` (Vercel Cron sends
   it automatically). Marks overdue requests (+ escalation draft), re-check
@@ -89,6 +91,11 @@ All behind the operator gate except where noted.
   template.
 
 ## Decisions in force
+
+- **Plain language first, law second.** Every label leads with everyday
+  words; the DSGVO article stays as small print and in the letters. All
+  user-facing wording for the request domain lives in
+  `src/requests/labels.ts` so tone stays consistent.
 
 - **No discovery automation, ever.** Crawling, scraping and people-search
   APIs are explicitly forbidden by the operator's spec; the source enum and

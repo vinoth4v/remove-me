@@ -8,10 +8,10 @@ import { addIdentifierAction, deleteIdentifierAction } from "./actions.ts"
 export const dynamic = "force-dynamic"
 
 const kindNames = {
-  name: "Name / name variant",
-  phone: "Phone number",
-  address: "Postal address",
-  email: "Email address",
+  name: "A name I go by",
+  phone: "A phone number",
+  address: "A postal address (current or old)",
+  email: "An email address",
 } as const
 
 export default async function VaultPage() {
@@ -31,22 +31,26 @@ export default async function VaultPage() {
   return (
     <main>
       <AppNav current="/vault" />
-      <h1>Identity vault</h1>
+      <h1>My details</h1>
       <p className="muted">
-        The identifiers this app tracks for you — names and variants, phone numbers, postal
-        addresses (including previous ones), and additional email addresses. Every value is
-        encrypted at rest with IDENTITY_ENCRYPTION_KEY and never appears in logs.
+        These are the details the app helps you get removed: names (including old or maiden names),
+        phone numbers, addresses you have lived at, and email addresses. Add everything you would
+        not want a stranger to find.
+      </p>
+      <p className="hint">
+        🔒 Everything here is stored encrypted. Your details never appear in any log, and the app
+        never sends them anywhere — they are only used to fill in letters that you send yourself.
       </p>
 
       {decrypted.length === 0 ? (
-        <p>No identifiers yet. Add the ones you want tracked.</p>
+        <p>Nothing here yet — add your first detail below. Your name is a good start.</p>
       ) : (
         <table>
           <thead>
             <tr>
-              <th>Type</th>
-              <th>Label</th>
-              <th>Value</th>
+              <th>What it is</th>
+              <th>Your note</th>
+              <th>The detail</th>
               <th />
             </tr>
           </thead>
@@ -70,9 +74,9 @@ export default async function VaultPage() {
 
       <form action={addIdentifierAction}>
         <fieldset>
-          <legend>Add identifier</legend>
+          <legend>Add a detail</legend>
           <p>
-            <label htmlFor="kind">Type</label>
+            <label htmlFor="kind">What kind of detail is it?</label>
             <br />
             <select id="kind" name="kind" required>
               {identifierKinds.map((kind) => (
@@ -83,21 +87,21 @@ export default async function VaultPage() {
             </select>
           </p>
           <p>
-            <label htmlFor="label">Label</label>
+            <label htmlFor="label">A short note so you recognise it later</label>
             <br />
             <input
               id="label"
               name="label"
               required
-              placeholder="e.g. maiden name, mobile, previous address"
+              placeholder="e.g. my maiden name, my old flat in Stuttgart, work mobile"
             />
           </p>
           <p>
-            <label htmlFor="value">Value</label>
+            <label htmlFor="value">The detail itself</label>
             <br />
-            <input id="value" name="value" required placeholder="the identifier itself" />
+            <input id="value" name="value" required placeholder="e.g. Erika Mustermann" />
           </p>
-          <button type="submit">Add to vault</button>
+          <button type="submit">Save (encrypted)</button>
         </fieldset>
       </form>
     </main>
