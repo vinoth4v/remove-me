@@ -1,21 +1,10 @@
 {
   "name": "remove-me",
   "title": "Remove Me",
-  "description": "Remove Me — a personal exposure console that inventories where my email is leaking, one-click unsubscribes legitimate bulk senders, and drafts trackable GDPR erasure requests for the rest.",
-  "stack": [
-    "next",
-    "typescript",
-    "neon",
-    "drizzle",
-    "next-auth",
-    "vercel"
-  ],
+  "description": "Remove Me — a personal data-removal console for German law: an encrypted identity vault, a DSGVO request orchestrator (Art. 15/16/17/21, DE/EN), a seeded registry of German opt-out actions, and a weekly sweep for overdue requests, due renewals, and re-listed data.",
+  "stack": ["next", "typescript", "neon", "drizzle", "next-auth", "vercel"],
   "url": "https://remove-me-pi.vercel.app",
-  "tags": [
-    "spam",
-    "removal",
-    "cyber security"
-  ],
+  "tags": ["privacy", "gdpr", "dsgvo", "removal", "cyber security"],
   "status": "prototype",
   "private": false
 }
