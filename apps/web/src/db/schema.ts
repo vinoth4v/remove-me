@@ -160,3 +160,43 @@ export const registryItem = pgTable("registry_item", {
 })
 
 export type RegistryItemRow = typeof registryItem.$inferSelect
+
+/**
+ * The operator's Gmail connection for the inbox unsubscribe feature. One row
+ * at most (single operator). The refresh token is AES-256-GCM ciphertext via
+ * src/vault/crypto.ts — it grants read access to a whole mailbox and is
+ * treated exactly like a vault identifier: never logged, never plaintext at
+ * rest. Scope is gmail.readonly only; the app never sends mail.
+ */
+export const gmailConnection = pgTable("gmail_connection", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  email: text("email").notNull(),
+  refreshTokenEncrypted: text("refresh_token_encrypted").notNull(),
+  connectedAt: timestamp("connected_at", { withTimezone: true }).notNull().defaultNow(),
+})
+
+export type GmailConnectionRow = typeof gmailConnection.$inferSelect
+
+export const bulkSenderStatuses = ["new", "unsubscribed", "kept"] as const
+export type BulkSenderStatus = (typeof bulkSenderStatuses)[number]
+
+/**
+ * A bulk sender found in the operator's own inbox via its List-Unsubscribe
+ * header. Unsubscribe targets often embed the operator's email address, so
+ * both are stored encrypted like vault values. `oneClick` marks RFC 8058
+ * endpoints the server may POST to on the operator's click.
+ */
+export const bulkSender = pgTable("bulk_sender", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  address: text("address").notNull().unique(),
+  name: text("name"),
+  messageCount: integer("message_count").notNull().default(1),
+  unsubscribeUrlEncrypted: text("unsubscribe_url_encrypted"),
+  unsubscribeMailtoEncrypted: text("unsubscribe_mailto_encrypted"),
+  oneClick: boolean("one_click").notNull().default(false),
+  status: text("status", { enum: bulkSenderStatuses }).notNull().default("new"),
+  lastSeenAt: timestamp("last_seen_at", { withTimezone: true }),
+  actedAt: timestamp("acted_at", { withTimezone: true }),
+})
+
+export type BulkSenderRow = typeof bulkSender.$inferSelect

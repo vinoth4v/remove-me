@@ -13,6 +13,11 @@ export type AuditKind =
   | "request_resolved"
   | "registry_action"
   | "cron_verify"
+  // Inbox events carry the sender/account address only — never tokens or
+  // unsubscribe targets.
+  | "gmail_connected"
+  | "inbox_scanned"
+  | "sender_unsubscribed"
 
 /**
  * Write an audit row, swallowing failures.

@@ -15,6 +15,13 @@
       "when": 1786559068485,
       "tag": "0001_identity_vault",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1786563839875,
+      "tag": "0002_inbox_unsubscribe",
+      "breakpoints": true
     }
   ]
 }

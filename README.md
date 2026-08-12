@@ -12,6 +12,11 @@ erasures old enough to have quietly come back.
 
 ## What it does
 
+- **Inbox unsubscribe** (`/inbox`): connect your Gmail (read-only OAuth) and
+  the app finds the bulk senders filling your inbox via their
+  `List-Unsubscribe` headers — then unsubscribes with one click per sender
+  (RFC 8058) or all at once, and hands you a prefilled email or link for the
+  rest. Needs a one-time Google OAuth client setup, explained on the page.
 - **Vault** (`/vault`): store the identifiers you want tracked — names and
   variants, phone numbers, postal addresses (including previous ones), extra
   email addresses. Every value is encrypted at rest (AES-256-GCM, key from
@@ -41,7 +46,10 @@ erasures old enough to have quietly come back.
 
 Works today: everything above, behind the single-operator gate.
 
-Does not (deliberately): no crawling, scraping, or people-search lookups of
+Does not (deliberately): the app never sends, deletes or changes mail — the
+Gmail scope is read-only, one-click unsubscribes are bare HTTP POSTs to the
+sender's own endpoint, and mailto unsubscribes open in your own mail app. No
+crawling, scraping, or people-search lookups of
 any kind — discovery is limited to breach APIs you hold a key for, Art. 15
 disclosures, and findings you enter yourself. No breach API is wired up yet
 (that needs a key and a dependency decision). Nothing is ever sent
