@@ -19,5 +19,5 @@ export default NextAuth(authConfig).auth
 export const config = {
   // api/cron is exempt from the session gate because Vercel Cron calls it
   // headlessly; the route enforces its own CRON_SECRET bearer check instead.
-  matcher: ["/((?!api/auth|api/cron|login|_next/static|_next/image|favicon.ico|icon.svg).*)"],
+  matcher: ["/((?!api/auth|api/cron|login|_next/static|_next/image|favicon.ico|icon.svg|werft-commit.txt).*)"],
 }
