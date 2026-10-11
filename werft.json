@@ -1,10 +1,23 @@
 {
   "name": "remove-me",
   "title": "Remove Me",
-  "description": "Remove Me — a personal data-removal console for German law: an encrypted identity vault, a DSGVO request orchestrator (Art. 15/16/17/21, DE/EN), a seeded registry of German opt-out actions, and a weekly sweep for overdue requests, due renewals, and re-listed data.",
-  "stack": ["next", "typescript", "neon", "drizzle", "next-auth", "vercel"],
-  "url": "https://remove-me-pi.vercel.app",
-  "tags": ["privacy", "gdpr", "dsgvo", "removal", "cyber security"],
+  "description": "Remove Me \u2014 a personal data-removal console for German law: an encrypted identity vault, a DSGVO request orchestrator (Art. 15/16/17/21, DE/EN), a seeded registry of German opt-out actions, and a weekly sweep for overdue requests, due renewals, and re-listed data.",
+  "stack": [
+    "next",
+    "typescript",
+    "neon",
+    "drizzle",
+    "next-auth",
+    "vercel"
+  ],
+  "url": "https://remove-me.vinothkannan.de",
+  "tags": [
+    "privacy",
+    "gdpr",
+    "dsgvo",
+    "removal",
+    "cyber security"
+  ],
   "status": "prototype",
   "private": false
 }
