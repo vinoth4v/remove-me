@@ -194,3 +194,11 @@ link — plus "unsubscribe from all one-click senders". Migration
 vars before the feature lights up (in-page instructions cover it). Preview
 deployments cannot connect Gmail — their URLs are not registered redirect
 URIs; expected, not a bug.
+
+## 2026-10-11 — Off Vercel and Neon: Coolify on the home server
+
+Production deploys from the Dockerfile on every push to `main`; PRs get a Coolify
+preview at `pr<N>-remove-me.vinothkannan.de` on a nightly copy of the production
+database. The container migrates its own database before starting
+(`deploy/start.mjs`); `proxy.ts` lets `/werft-commit.txt` through so CI can tell
+the preview serves the PR's commit before Playwright runs.
